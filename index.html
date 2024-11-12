@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Visualization Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+
+    <h1>Data Visualization Dashboard</h1>
+
+    <!-- Filters -->
+    <label for="year">Year:</label>
+    <input type="number" id="year" name="year" placeholder="Enter year">
+
+    <label for="country">Country:</label>
+    <input type="text" id="country" name="country" placeholder="Enter country">
+
+    <label for="topic">Topic:</label>
+    <input type="text" id="topic" name="topic" placeholder="Enter topic">
+
+    <button onclick="fetchData()">Apply Filters</button>
+
+    <!-- Plotly Chart -->
+    <div id="chart" style="width:100%;max-width:700px;margin-top:30px;"></div>
+
+    <script>
+        function fetchData() {
+            // Get filter values
+            const year = document.getElementById('year').value;
+            const country = document.getElementById('country').value;
+            const topic = document.getElementById('topic').value;
+
+            // Build the API URL with query parameters
+            let url = '/data?';
+            if (year) url += `year=${year}&`;
+            if (country) url += `country=${country}&`;
+            if (topic) url += `topic=${topic}&`;
+
+            // Fetch data from the API
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    // Prepare data for Plotly
+                    const x = data.map(item => item.intensity);
+                    const y = data.map(item => item.likelihood);
+                    const labels = data.map(item => `${item.country}, ${item.year}`);
+
+                    const trace = {
+                        x: x,
+                        y: y,
+                        text: labels,
+                        mode: 'markers',
+                        marker: { size: 12 }
+                    };
+
+                    const layout = {
+                        title: 'Intensity vs Likelihood',
+                        xaxis: { title: 'Intensity' },
+                        yaxis: { title: 'Likelihood' }
+                    };
+
+                    // Render the chart
+                    Plotly.newPlot('chart', [trace], layout);
+                });
+        }
+    </script>
+</body>
+</html>
